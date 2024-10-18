@@ -3,31 +3,31 @@
 [![](https://img.shields.io/badge/📖_How_to_use_DevExpress_Examples-e9f6fc?style=flat-square)](https://docs.devexpress.com/GeneralInformation/403183)
 [![](https://img.shields.io/badge/💬_Leave_Feedback-feecdd?style=flat-square)](#does-this-example-address-your-development-requirementsobjectives)
 <!-- default badges end -->
-# Product/Platform - Task
+# DevExpress Blazor TreeList – How to enable batch data editing with Entity Framework Core
 
-This is the repository template for creating new examples. Describe the solved task here.
+This example uses [Entity Framework Core](https://learn.microsoft.com/en-us/ef/core/) to introduce batch data editing when using the [DevExpress Blazor TreeList](https://docs.devexpress.com/Blazor/404942/treelist) component.
 
-Put a screenshot that illustrates the result here.
+![Batch Editing in DevExpress Blazor TreeList](/images/batch-editing.gif)
 
-Then, add implementation details (steps, code snippets, and other technical information in a free form), or add a link to an existing document with implementation details. 
+Our sample uses [DbContext](https://learn.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.dbcontext) to obtain and update Blazor TreeList data. When a user creates a new row or modifies/deletes an existing row, a [DbContext](https://learn.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.dbcontext) instance tracks changes. End users can press **Save** to save all changes made in this context or press **Cancel** to dispose this context and discard accumulated changes.
+
+The [CustomizeElement](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxTreeList.CustomizeElement) event handler uses the [DbContext.ChangeTracker](https://learn.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.dbcontext.changetracker#microsoft-entityframeworkcore-dbcontext-changetracker) property to identify and highlight modified cells.
 
 ## Files to Review
 
-- link.cs (VB: link.vb)
-- link.js
-- ...
+* [Index.razor](./CS/TreeListBatchEditing/Components/Pages/Index.razor)
+* [Index.razor.css](./CS/TreeListBatchEditing/Components/Pages/Index.razor.css)
 
 ## Documentation
 
-- link
-- link
-- ...
+- [Cell Editing in Blazor TreeList](https://docs.devexpress.com/Blazor/405166/components/treelist/editing-and-validation/edit-modes/edit-cell)
+- [Edit Model in Blazor TreeList](https://docs.devexpress.com/Blazor/405170/components/treelist/editing-and-validation/edit-model)
 
 ## More Examples
 
-- link
-- link
-- ...
+- [Getting Started with the Blazor TreeList](https://github.com/DevExpress-Examples/blazor-treelist-get-started)
+- [How to bind the component to DevExtreme data source with Entity Framework Core](https://github.com/DevExpress-Examples/blazor-treelist-bind-to-server-side-data)
+
 <!-- feedback -->
 ## Does this example address your development requirements/objectives?
 

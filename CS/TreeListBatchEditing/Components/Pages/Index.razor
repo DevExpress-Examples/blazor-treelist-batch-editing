@@ -1,0 +1,141 @@
+﻿@page "/"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.EntityFrameworkCore.ChangeTracking
+@using TreeListBatchEditing.Services;
+@using TreeListBatchEditing.Data;
+
+@implements IDisposable
+@rendermode InteractiveServer
+@inject CitiesService CitiesService
+@inject IDbContextFactory<CitiesContext> CitiesContextFactory
+
+<div>
+    <DxTreeList @ref="TreeList"
+                Data="@Data"
+                KeyFieldName="ID"
+                ParentKeyFieldName="ParentID"
+                HasChildrenFieldName="HasChildren"
+                AutoExpandAllNodes="true"
+                ValidationEnabled="false"
+                EditMode="TreeListEditMode.EditCell"
+                EditModelSaving="TreeList_EditModelSaving"
+                CustomizeElement="TreeList_CustomizeElement"
+                CustomizeEditModel="TreeList_CustomizeEditModel">
+        <Columns>
+            <DxTreeListDataColumn Caption="Location" FieldName="Name" />
+            <DxTreeListDataColumn FieldName="CityType" />
+            <DxTreeListDataColumn FieldName="Year" DisplayFormat="d" />
+            <DxTreeListDataColumn FieldName="RecordType" />
+            <DxTreeListDataColumn FieldName="Population" />
+            <DxTreeListCommandColumn Width="90px">
+                <HeaderTemplate>
+                    <DxButton IconCssClass="treelist-icon treelist-icon-add"
+                              RenderStyle="ButtonRenderStyle.Link"
+                              aria-label="New"
+                              Click="@(() => TreeList.StartEditNewRowAsync())" />
+                </HeaderTemplate>
+                <CellDisplayTemplate>
+                    <div class="treelist-cell-align-center">
+                        <DxButton IconCssClass="treelist-icon treelist-icon-add"
+                                  RenderStyle="ButtonRenderStyle.Link"
+                                  aria-label="New"
+                                  Click="@(() => TreeList.StartEditNewRowAsync(context.VisibleIndex))" />
+                        <DxButton IconCssClass="treelist-icon treelist-icon-delete"
+                                  RenderStyle="ButtonRenderStyle.Link"
+                                  aria-label="Delete"
+                                  Click="@(() => Delete_Click((Location)context.DataItem))" />
+                    </div>
+                </CellDisplayTemplate>
+                <CellEditTemplate>
+                    <div class="treelist-cell-align-center">
+                        <DxButton Enabled="false"
+                                  CssClass="treelist-disabled-button"
+                                  IconCssClass="treelist-icon treelist-icon-add"
+                                  aria-label="New"
+                                  RenderStyle="ButtonRenderStyle.Link" />
+                        <DxButton Enabled="false"
+                                  CssClass="treelist-disabled-button"
+                                  IconCssClass="treelist-icon treelist-icon-delete"
+                                  aria-label="Delete"
+                                  RenderStyle="ButtonRenderStyle.Link" />
+                    </div>
+                </CellEditTemplate>
+            </DxTreeListCommandColumn>
+        </Columns>
+        <ToolbarTemplate>
+            <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+                <DxToolbarItem Text="Save" Click="Save_Click" IconCssClass="treelist-toolbar-save" Enabled="BatchItemsEnabled" />
+                <DxToolbarItem Text="Cancel" Click="Cancel_Click" IconCssClass="treelist-toolbar-cancel" Enabled="BatchItemsEnabled" />
+            </DxToolbar>
+        </ToolbarTemplate>
+    </DxTreeList>
+</div>
+
+@code {
+    ITreeList TreeList { get; set; }
+    IList<Location> Data { get; set; }
+    CitiesContext DbContext { get; set; }
+    bool BatchItemsEnabled => DbContext.ChangeTracker.HasChanges() || TreeList.IsEditing();
+
+    protected override async Task OnInitializedAsync() {
+        await ReloadData();
+    }
+    void IDisposable.Dispose() {
+        DbContext?.Dispose();
+    }
+
+    async Task New_Click() => await TreeList.StartEditNewRowAsync();
+    async Task Save_Click() => await DbContext.SaveChangesAsync();
+    async Task Cancel_Click() => await ReloadData();
+
+    void Delete_Click(Location dataItem) {
+        DbContext.Remove(dataItem);
+        Data.Remove(dataItem);
+        TreeList.Reload();
+    }
+
+    void TreeList_CustomizeElement(TreeListCustomizeElementEventArgs e) {
+        if (e.ElementType == TreeListElementType.DataCell) {
+            var employee = (Location)TreeList.GetDataItem(e.VisibleIndex);
+            var column = (ITreeListDataColumn)e.Column;
+            if (TryGetChangedEntityEntry(employee, out var entityEntry)) {
+                if (entityEntry.State == EntityState.Added || entityEntry.Property(column.FieldName).IsModified)
+                    e.CssClass = "treelist-modified-cell";
+            }
+        }
+    }
+
+    void TreeList_CustomizeEditModel(TreeListCustomizeEditModelEventArgs e) {
+        if (e.IsNew) {
+            var newLocation = (Location)e.EditModel;
+            newLocation.ID = Data.Max(x => x.ID) + 1;
+            if (e.ParentDataItem != null)
+                newLocation.ParentID = ((Location)e.ParentDataItem).ID;
+        }
+        else
+            e.EditModel = e.DataItem;
+    }
+
+    async Task TreeList_EditModelSaving(TreeListEditModelSavingEventArgs e) {
+        if (e.IsNew) {
+            var editModel = (Location)e.EditModel;
+            await DbContext.AddAsync(editModel);
+            Data.Add(editModel);
+        }
+    }
+
+    bool TryGetChangedEntityEntry<T>(T entity, out EntityEntry<T> entry) where T : class {
+        entry = null;
+        if (!DbContext.ChangeTracker.HasChanges())
+            return false;
+        entry = DbContext.ChangeTracker.Entries<T>().FirstOrDefault(x => x.Entity == entity);
+        return entry != null && entry.State != EntityState.Unchanged && entry.State != EntityState.Detached;
+    }
+
+    async Task ReloadData() {
+        DbContext?.Dispose();
+        DbContext = await CitiesContextFactory.CreateDbContextAsync();
+        Data = await DbContext.Locations.ToListAsync();
+        TreeList?.Reload();
+    }
+}
