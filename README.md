@@ -4,15 +4,15 @@
 [![](https://img.shields.io/badge/📖_How_to_use_DevExpress_Examples-e9f6fc?style=flat-square)](https://docs.devexpress.com/GeneralInformation/403183)
 [![](https://img.shields.io/badge/💬_Leave_Feedback-feecdd?style=flat-square)](#does-this-example-address-your-development-requirementsobjectives)
 <!-- default badges end -->
-# DevExpress Blazor TreeList – How to enable batch data editing with Entity Framework Core
+# DevExpress Blazor TreeList – Implement batch data editing using Entity Framework Core
 
-This example uses [Entity Framework Core](https://learn.microsoft.com/en-us/ef/core/) to introduce batch data editing when using the [DevExpress Blazor TreeList](https://docs.devexpress.com/Blazor/404942/treelist) component.
+This example introduces batch data editing support when using Microsoft [Entity Framework Core](https://learn.microsoft.com/en-us/ef/core/) in your DevExpress-powered Blazor app.
 
 ![Batch Editing in DevExpress Blazor TreeList](/images/batch-editing.gif)
 
-Our sample uses [DbContext](https://learn.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.dbcontext) to obtain and update Blazor TreeList data. When a user creates a new row or modifies/deletes an existing row, a [DbContext](https://learn.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.dbcontext) instance tracks changes. End users can press **Save** to save all changes made in this context or press **Cancel** to dispose this context and discard accumulated changes.
+Our sample uses [DbContext](https://learn.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.dbcontext) to obtain and update [DevExpress Blazor TreeList](https://docs.devexpress.com/Blazor/404942/treelist) data. When a user creates a new row or modifies/deletes an existing row, a [DbContext](https://learn.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.dbcontext) instance tracks changes made to underlying data. End users can press **Save** to record all changes made within this context or press **Cancel** to dispose the context and discard accumulated changes.
 
-The [CustomizeElement](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxTreeList.CustomizeElement) event handler uses the [DbContext.ChangeTracker](https://learn.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.dbcontext.changetracker#microsoft-entityframeworkcore-dbcontext-changetracker) property to identify and highlight modified cells.
+The [CustomizeElement](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxTreeList.CustomizeElement) event handler uses the [DbContext.ChangeTracker](https://learn.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.dbcontext.changetracker#microsoft-entityframeworkcore-dbcontext-changetracker) property to identify and highlight modified cells.
 
 ## Files to Review
 
